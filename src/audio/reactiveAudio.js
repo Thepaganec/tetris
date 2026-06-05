@@ -72,7 +72,7 @@ export class ReactiveAudio {
 
     this.loopAudio = new Audio(loopSrc);
     this.loopAudio.loop = true;
-    this.loopAudio.volume = 0.34;
+    this.loopAudio.volume = 0.26;
     this.playLoopIfReady();
   }
 
