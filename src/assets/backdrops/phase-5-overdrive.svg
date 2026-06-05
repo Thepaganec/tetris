@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="Retro arcade reactor overdrive backdrop">
+  <defs>
+    <radialGradient id="overdrive" cx="50%" cy="47%" r="60%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity=".95"/>
+      <stop offset="12%" stop-color="#ffe45c" stop-opacity=".9"/>
+      <stop offset="28%" stop-color="#ff426d" stop-opacity=".76"/>
+      <stop offset="52%" stop-color="#ff3df2" stop-opacity=".5"/>
+      <stop offset="80%" stop-color="#07111e" stop-opacity=".94"/>
+      <stop offset="100%" stop-color="#02040c"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="#02040c"/>
+  <rect width="1600" height="1000" fill="url(#overdrive)"/>
+  <g transform="translate(800 480)" fill="none" stroke-linejoin="round">
+    <path d="M0-420 120-145 410-160 175 25 260 330 0 155-260 330-175 25-410-160-120-145z" stroke="#ffe45c" stroke-width="13" opacity=".75"/>
+    <path d="M0-330 85-105 320-120 135 12 200 255 0 120-200 255-135 12-320-120-85-105z" stroke="#41e8ff" stroke-width="8" opacity=".5"/>
+    <circle r="95" stroke="#ffffff" stroke-width="8" opacity=".42"/>
+  </g>
+  <g stroke="#ffffff" stroke-width="3" opacity=".18">
+    <path d="M0 110 1600 890M0 890 1600 110M800 0v1000M0 500h1600"/>
+  </g>
+  <g fill="#41e8ff" opacity=".2">
+    <path d="M80 120h360l-70 70H150zM1160 118h360l-70 70h-220zM120 780h440l-90 80H210zM1040 790h470l-88 78h-290z"/>
+  </g>
+</svg>

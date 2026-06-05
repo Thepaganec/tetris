@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="Retro arcade void surge backdrop">
+  <defs>
+    <radialGradient id="void" cx="50%" cy="50%" r="66%">
+      <stop offset="0%" stop-color="#c451ff" stop-opacity=".9"/>
+      <stop offset="13%" stop-color="#ff3df2" stop-opacity=".7"/>
+      <stop offset="32%" stop-color="#21092f" stop-opacity=".74"/>
+      <stop offset="74%" stop-color="#050712" stop-opacity=".95"/>
+      <stop offset="100%" stop-color="#02040c"/>
+    </radialGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff3df2" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#ff3df2" stop-opacity=".65"/>
+      <stop offset="100%" stop-color="#41e8ff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="#02040c"/>
+  <rect width="1600" height="1000" fill="url(#void)"/>
+  <g transform="translate(800 500)" fill="none">
+    <ellipse rx="470" ry="140" stroke="#ff3df2" stroke-width="12" opacity=".34"/>
+    <ellipse rx="330" ry="92" stroke="#41e8ff" stroke-width="8" opacity=".42" transform="rotate(-12)"/>
+    <ellipse rx="240" ry="60" stroke="#ffe45c" stroke-width="6" opacity=".46" transform="rotate(17)"/>
+    <circle r="125" stroke="#ffffff" stroke-width="5" opacity=".22"/>
+  </g>
+  <g opacity=".55">
+    <rect x="0" y="235" width="1600" height="32" fill="url(#beam)" transform="rotate(-9 800 251)"/>
+    <rect x="0" y="705" width="1600" height="26" fill="url(#beam)" transform="rotate(8 800 718)"/>
+    <rect x="0" y="480" width="1600" height="18" fill="url(#beam)"/>
+  </g>
+  <g fill="#ffffff" opacity=".35">
+    <circle cx="180" cy="190" r="2"/><circle cx="310" cy="680" r="3"/><circle cx="520" cy="125" r="2"/>
+    <circle cx="1180" cy="210" r="3"/><circle cx="1370" cy="645" r="2"/><circle cx="990" cy="845" r="2"/>
+  </g>
+</svg>

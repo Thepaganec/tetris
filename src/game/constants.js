@@ -11,7 +11,8 @@ export const COLORS = {
   O: "#ffe45c",
   S: "#46ff8f",
   T: "#c451ff",
-  Z: "#ff426d"
+  Z: "#ff426d",
+  X: "#f8fafc"
 };
 
 export const SHAPES = {
@@ -31,5 +32,6 @@ export const TETROMINO_TYPES = Object.keys(SHAPES);
 export const STORAGE_KEYS = {
   highScore: "cosmicTetris.highScore",
   bestCombo: "cosmicTetris.bestCombo",
-  audioMuted: "cosmicTetris.audioMuted"
+  audioMuted: "cosmicTetris.audioMuted",
+  profile: "cosmicTetris.profile.v2"
 };

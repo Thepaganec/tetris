@@ -3,6 +3,8 @@ export class ReactiveAudio {
   constructor(isMuted) {
     this.isMuted = isMuted;
     this.context = null;
+    this.loopAudio = null;
+    this.loopSrc = null;
   }
 
   /** Разблокирует Web Audio после пользовательского жеста. */
@@ -16,6 +18,7 @@ export class ReactiveAudio {
     if (this.context.state === "suspended") {
       await this.context.resume();
     }
+    this.playLoopIfReady();
   }
 
   /** Переключает звук и возвращает новое состояние. */
@@ -24,11 +27,22 @@ export class ReactiveAudio {
     if (isMuted && this.context && this.context.state === "running") {
       this.context.suspend();
     }
+    if (isMuted && this.loopAudio) {
+      this.loopAudio.pause();
+    }
+    if (!isMuted) {
+      this.playLoopIfReady();
+    }
     return this.isMuted;
   }
 
   /** Проигрывает звук, соответствующий игровому событию. */
   playEvent(event) {
+    if (event.type === "phaseLoopChanged") {
+      this.setPhaseLoop(event.loop);
+      return;
+    }
+
     if (this.isMuted || !this.context || this.context.state !== "running") return;
 
     if (event.type === "move") this.playTone(180, 0.035, "triangle", 0.025);
@@ -38,7 +52,28 @@ export class ReactiveAudio {
     if (event.type === "hardDrop") this.playImpact(85, 0.18, 0.11);
     if (event.type === "lineClear") this.playLineClear(event.count, event.combo);
     if (event.type === "reactorBurst") this.playImpact(62, 0.42, 0.18);
+    if (event.type === "hazardWarning") this.playHazardWarning();
+    if (event.type === "hazardApplied") this.playImpact(72, 0.22, 0.1);
+    if (event.type === "objectiveCompleted") this.playObjectiveComplete();
+    if (event.type === "phaseUnlocked") this.playPhaseUnlocked();
     if (event.type === "gameOver") this.playImpact(48, 0.5, 0.15);
+  }
+
+  /** Переключает фазовый loop asset. */
+  setPhaseLoop(loopSrc) {
+    if (this.loopSrc === loopSrc) return;
+    if (this.loopAudio) {
+      this.loopAudio.pause();
+      this.loopAudio = null;
+    }
+
+    this.loopSrc = loopSrc;
+    if (!loopSrc || typeof Audio === "undefined") return;
+
+    this.loopAudio = new Audio(loopSrc);
+    this.loopAudio.loop = true;
+    this.loopAudio.volume = 0.34;
+    this.playLoopIfReady();
   }
 
   playLineClear(count, combo) {
@@ -46,6 +81,24 @@ export class ReactiveAudio {
     this.playTone(base, 0.1, "triangle", 0.07);
     this.playTone(base * 1.5 + combo * 16, 0.16, "sawtooth", 0.04, 0.025);
     this.playNoise(0.12, 0.06);
+  }
+
+  playHazardWarning() {
+    this.playTone(620, 0.08, "square", 0.045);
+    this.playTone(420, 0.08, "square", 0.035, 0.1);
+    this.playNoise(0.08, 0.03);
+  }
+
+  playObjectiveComplete() {
+    this.playTone(520, 0.12, "triangle", 0.06);
+    this.playTone(780, 0.16, "triangle", 0.05, 0.08);
+    this.playTone(1040, 0.2, "triangle", 0.04, 0.17);
+  }
+
+  playPhaseUnlocked() {
+    this.playImpact(96, 0.24, 0.08);
+    this.playTone(700, 0.18, "sawtooth", 0.06, 0.06);
+    this.playTone(980, 0.24, "triangle", 0.05, 0.17);
   }
 
   playImpact(frequency, duration, gain) {
@@ -89,5 +142,12 @@ export class ReactiveAudio {
     gain.connect(this.context.destination);
     source.start(now);
     source.stop(now + duration);
+  }
+
+  playLoopIfReady() {
+    if (this.isMuted || !this.loopAudio || !this.context || this.context.state !== "running") return;
+    this.loopAudio.play().catch(() => {
+      // Браузер может отложить playback до следующего пользовательского жеста.
+    });
   }
 }

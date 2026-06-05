@@ -7,7 +7,7 @@ export class GameHud {
   }
 
   /** Обновляет все числовые показатели и preview-блоки. */
-  update(snapshot, records, isMuted) {
+  update(snapshot, records, isMuted, context = {}) {
     document.body.dataset.gameState = snapshot.state;
     this.elements.score.textContent = formatNumber(snapshot.score);
     this.elements.level.textContent = String(snapshot.level);
@@ -21,6 +21,16 @@ export class GameHud {
     this.elements.stateLabel.textContent = formatState(snapshot.state);
     this.elements.muteButton.textContent = isMuted ? "Sound Off" : "Sound On";
     this.elements.muteButton.setAttribute("aria-pressed", isMuted ? "true" : "false");
+
+    if (this.elements.phaseTitle && context.phase) {
+      this.elements.phaseTitle.textContent = context.phase.title;
+      this.elements.phaseTagline.textContent = context.phase.tagline;
+      renderObjectives(this.elements.objectiveList, context.phase, context.profile);
+    }
+    if (this.elements.hazardChip) {
+      this.elements.hazardChip.textContent = formatHazard(snapshot);
+      this.elements.hazardChip.dataset.alert = snapshot.hazardWarning ? "warning" : "idle";
+    }
 
     renderPreview(this.elements.nextPreview, snapshot.queue[0]);
     renderPreview(this.elements.holdPreview, snapshot.holdType);
@@ -82,6 +92,28 @@ function renderPreview(root, type) {
     cell.style.boxShadow = `0 0 18px ${COLORS[type]}`;
     cell.classList.add("active");
   });
+}
+
+function renderObjectives(root, phase, profile) {
+  if (!root || !phase) return;
+  const completed = profile?.phaseProgress?.[phase.id]?.completedObjectives || [];
+  root.innerHTML = "";
+  phase.objectives.forEach((objective) => {
+    const item = document.createElement("li");
+    item.className = completed.includes(objective.id) ? "complete" : "";
+    item.textContent = objective.label;
+    root.appendChild(item);
+  });
+}
+
+function formatHazard(snapshot) {
+  if (snapshot.hazardWarning) {
+    const seconds = Math.max(0, snapshot.hazardWarning.remaining / 1000).toFixed(1);
+    return `${snapshot.hazardWarning.label} in ${seconds}s`;
+  }
+  if (snapshot.activeHazards.speedSpike) return "Gravity spike active";
+  if (snapshot.activeHazards.lockedZone.length) return "Locked zone active";
+  return "Channel clear";
 }
 
 function getShapeBounds(cells) {

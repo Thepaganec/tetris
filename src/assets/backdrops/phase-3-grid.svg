@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="Retro arcade plasma grid backdrop">
+  <defs>
+    <radialGradient id="plasma" cx="50%" cy="48%" r="58%">
+      <stop offset="0%" stop-color="#46ff8f" stop-opacity=".9"/>
+      <stop offset="18%" stop-color="#41e8ff" stop-opacity=".68"/>
+      <stop offset="48%" stop-color="#0e5c75" stop-opacity=".55"/>
+      <stop offset="78%" stop-color="#07111e" stop-opacity=".92"/>
+      <stop offset="100%" stop-color="#02040c"/>
+    </radialGradient>
+    <pattern id="tiles" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M0 0h80v80H0z" fill="none" stroke="#41e8ff" stroke-width="2" opacity=".18"/>
+      <path d="M40 0v80M0 40h80" stroke="#46ff8f" stroke-width="1" opacity=".16"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="1000" fill="#02040c"/>
+  <rect width="1600" height="1000" fill="url(#plasma)"/>
+  <rect width="1600" height="1000" fill="url(#tiles)" opacity=".78"/>
+  <g transform="translate(800 490)" fill="none">
+    <rect x="-360" y="-360" width="720" height="720" rx="42" stroke="#46ff8f" stroke-width="10" opacity=".38"/>
+    <rect x="-260" y="-260" width="520" height="520" rx="28" stroke="#41e8ff" stroke-width="8" opacity=".52"/>
+    <rect x="-155" y="-155" width="310" height="310" rx="18" stroke="#ffe45c" stroke-width="8" opacity=".62"/>
+    <path d="M-500-120h1000M-500 120h1000M-120-500v1000M120-500v1000" stroke="#ffffff" stroke-width="3" opacity=".18"/>
+  </g>
+  <g fill="#ff3df2" opacity=".25">
+    <rect x="125" y="105" width="220" height="22"/><rect x="1285" y="130" width="190" height="22"/>
+    <rect x="180" y="845" width="270" height="22"/><rect x="1110" y="810" width="330" height="22"/>
+  </g>
+</svg>

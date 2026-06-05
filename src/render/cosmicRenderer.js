@@ -23,6 +23,8 @@ export class CosmicRenderer {
     this.particles = [];
     this.shockwaves = [];
     this.streaks = [];
+    this.telegraphs = [];
+    this.phasePalette = { primary: "#41e8ff", secondary: "#ff3df2", accent: "#ffe45c" };
     this.time = 0;
     this.flash = 0;
     this.shakePower = 0;
@@ -57,9 +59,19 @@ export class CosmicRenderer {
     this.snapshot = snapshot;
   }
 
+  /** Устанавливает фазовую палитру до первого игрового события. */
+  setPhase(phase) {
+    if (phase?.palette) {
+      this.phasePalette = phase.palette;
+    }
+  }
+
   /** Превращает события game core в визуальные эффекты. */
   processEvents(events) {
     events.forEach((event) => {
+      if (event.type === "phaseStarted" && event.phase?.palette) {
+        this.phasePalette = event.phase.palette;
+      }
       if (event.type === "move" || event.type === "rotate" || event.type === "softDrop") {
         this.spawnCellSparks(event.cells || [], "#9df7ff", 2, 0.45);
       }
@@ -91,16 +103,40 @@ export class CosmicRenderer {
         this.spawnRadialBurst(center.x, center.y, "#ff426d", 120, 2.2);
         this.shakePower = Math.max(this.shakePower, 16);
       }
+      if (event.type === "hazardWarning") {
+        this.addTelegraph(event);
+        this.showCallout(`WARNING: ${event.label}`, this.phasePalette.secondary, 28);
+        this.shakePower = Math.max(this.shakePower, 5);
+      }
+      if (event.type === "hazardApplied") {
+        const center = event.cells?.length ? this.getCellsCenter(event.cells) : this.getBoardCenter();
+        this.addShockwave(center.x, center.y, this.phasePalette.secondary, 0.48, 260);
+        this.spawnRadialBurst(center.x, center.y, this.phasePalette.secondary, 42, 1.55);
+        this.showCallout(event.label.toUpperCase(), this.phasePalette.accent, 27);
+        this.flash = Math.max(this.flash, 0.28);
+        this.shakePower = Math.max(this.shakePower, 10);
+      }
+      if (event.type === "hazardExpired") {
+        this.spawnCellSparks(event.cells || [], "#f8fafc", 5, 0.9);
+      }
+      if (event.type === "objectiveCompleted") {
+        this.showCallout("OBJECTIVE COMPLETE", this.phasePalette.accent, 30);
+      }
+      if (event.type === "phaseUnlocked") {
+        this.showCallout("PHASE UNLOCKED", this.phasePalette.primary, 34);
+        const center = this.getBoardCenter();
+        this.addShockwave(center.x, center.y, this.phasePalette.primary, 0.58, 340);
+      }
     });
   }
 
   /** Проигрывает cinematic intro перед стартом партии. */
-  playIntro() {
+  playIntro(phase = null) {
     const intro = new Container();
     const shade = new Graphics();
     const rings = new Graphics();
     const title = new Text({
-      text: "COSMIC REACTOR",
+      text: phase ? phase.title.toUpperCase() : "COSMIC REACTOR",
       style: {
         align: "center",
         fill: "#eef8ff",
@@ -110,7 +146,7 @@ export class CosmicRenderer {
       }
     });
     const subtitle = new Text({
-      text: "CORE IGNITION",
+      text: phase ? "PHASE IGNITION" : "CORE IGNITION",
       style: {
         align: "center",
         fill: "#41e8ff",
@@ -122,8 +158,10 @@ export class CosmicRenderer {
 
     const { width, height } = this.getScreenSize();
     shade.rect(0, 0, width, height).fill({ color: 0x030510, alpha: 0.84 });
-    rings.circle(0, 0, 86).stroke({ color: 0x41e8ff, alpha: 0.7, width: 3 });
-    rings.circle(0, 0, 138).stroke({ color: 0xff3df2, alpha: 0.35, width: 2 });
+    const primary = toHexNumber(this.phasePalette.primary);
+    const secondary = toHexNumber(this.phasePalette.secondary);
+    rings.circle(0, 0, 86).stroke({ color: primary, alpha: 0.7, width: 3 });
+    rings.circle(0, 0, 138).stroke({ color: secondary, alpha: 0.35, width: 2 });
     rings.position.set(width / 2, height / 2);
     title.anchor.set(0.5);
     title.position.set(width / 2, height / 2 - 18);
@@ -196,10 +234,12 @@ export class CosmicRenderer {
     const pulse = 0.5 + Math.sin(this.time * 0.003) * 0.5;
     const charge = this.snapshot ? this.snapshot.reactorCharge / 100 : 0;
     const ringAlpha = 0.2 + charge * 0.36 + pulse * 0.08;
+    const primary = toHexNumber(this.phasePalette.primary);
+    const secondary = toHexNumber(this.phasePalette.secondary);
     this.background.circle(center.x, center.y, this.field.width * (0.72 + pulse * 0.04))
-      .stroke({ color: 0x41e8ff, alpha: ringAlpha, width: 2 });
+      .stroke({ color: primary, alpha: ringAlpha, width: 2 });
     this.background.circle(center.x, center.y, this.field.width * (0.92 + pulse * 0.05))
-      .stroke({ color: 0xff3df2, alpha: 0.16 + charge * 0.22, width: 1 });
+      .stroke({ color: secondary, alpha: 0.16 + charge * 0.22, width: 1 });
 
     for (let i = 0; i < 12; i += 1) {
       const angle = (Math.PI * 2 * i) / 12 + this.time * 0.00035;
@@ -207,7 +247,7 @@ export class CosmicRenderer {
       const end = this.field.width * (1.05 + charge * 0.2);
       this.background.moveTo(center.x + Math.cos(angle) * start, center.y + Math.sin(angle) * start);
       this.background.lineTo(center.x + Math.cos(angle) * end, center.y + Math.sin(angle) * end);
-      this.background.stroke({ color: 0x41e8ff, alpha: 0.06 + charge * 0.1, width: 1 });
+      this.background.stroke({ color: primary, alpha: 0.06 + charge * 0.1, width: 1 });
     }
   }
 
@@ -286,6 +326,7 @@ export class CosmicRenderer {
 
   drawEffects() {
     this.effectLayer.clear();
+    this.drawTelegraphs();
 
     for (let i = 0; i < this.streaks.length; i += 1) {
       const streak = this.streaks[i];
@@ -340,6 +381,41 @@ export class CosmicRenderer {
       streak.life -= delta;
       return streak.life > 0;
     });
+
+    this.telegraphs = this.telegraphs.filter((telegraph) => {
+      telegraph.life -= delta;
+      return telegraph.life > 0;
+    });
+  }
+
+  drawTelegraphs() {
+    const field = this.field;
+    const color = toHexNumber(this.phasePalette.secondary);
+    for (let i = 0; i < this.telegraphs.length; i += 1) {
+      const telegraph = this.telegraphs[i];
+      const progress = Math.max(0, telegraph.life / telegraph.maxLife);
+      const pulse = 0.45 + Math.sin(this.time * 0.025) * 0.35;
+      const alpha = Math.max(0.12, progress * 0.34 + pulse * 0.16);
+
+      telegraph.rows.forEach((row) => {
+        this.effectLayer.rect(field.x, field.y + row * field.cell, field.width, field.cell)
+          .fill({ color, alpha: alpha * 0.42 })
+          .stroke({ color, alpha, width: 2 });
+      });
+
+      telegraph.cells.forEach((cell) => {
+        const x = field.x + cell.x * field.cell;
+        const y = field.y + cell.y * field.cell;
+        this.effectLayer.rect(x + 2, y + 2, field.cell - 4, field.cell - 4)
+          .stroke({ color, alpha: Math.min(0.95, alpha + 0.18), width: 3 });
+      });
+
+      if (!telegraph.rows.length && !telegraph.cells.length) {
+        const center = this.getBoardCenter();
+        this.effectLayer.circle(center.x, center.y, field.width * (0.62 + (1 - progress) * 0.18))
+          .stroke({ color, alpha, width: 4 });
+      }
+    }
   }
 
   spawnLineExplosion(event) {
@@ -421,6 +497,16 @@ export class CosmicRenderer {
         life: 260,
         maxLife: 260
       });
+    });
+  }
+
+  addTelegraph(event) {
+    this.telegraphs.push({
+      cells: event.cells || [],
+      rows: event.rows || [],
+      label: event.label,
+      life: event.warningDuration || 900,
+      maxLife: event.warningDuration || 900
     });
   }
 

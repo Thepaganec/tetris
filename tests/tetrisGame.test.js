@@ -54,4 +54,36 @@ describe("TetrisGame", () => {
     expect(snapshot.backToBack).toBe(1);
     expect(snapshot.reactorCharge).toBeGreaterThan(70);
   });
+
+  test("phase hazards warn before applying speed spike", () => {
+    const game = new TetrisGame();
+    game.startGame({
+      id: "test-phase",
+      title: "Test Phase",
+      hazards: ["speedSpike"],
+      difficulty: {
+        hazardInitialDelay: 1,
+        hazardMinInterval: 1000,
+        hazardMaxInterval: 1000,
+        warningDuration: 100,
+        speedMultiplier: 0.5,
+        speedDuration: 600
+      }
+    });
+    game.drainEvents();
+
+    game.update(2);
+    const warningEvents = game.drainEvents();
+
+    expect(warningEvents.some((event) => event.type === "hazardWarning" && event.hazardType === "speedSpike")).toBe(true);
+    expect(game.getSnapshot().hazardWarning.label).toBe("Gravity spike");
+
+    game.update(120);
+    const appliedEvents = game.drainEvents();
+    const snapshot = game.getSnapshot();
+
+    expect(appliedEvents.some((event) => event.type === "hazardApplied" && event.hazardType === "speedSpike")).toBe(true);
+    expect(snapshot.activeHazards.speedSpike).toBe(true);
+    expect(game.getEffectiveDropInterval()).toBeLessThan(game.getDropInterval());
+  });
 });

@@ -4,113 +4,192 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cosmic Reactor Tetris</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23030510'/%3E%3Cpath d='M14 14h36v36H14z' fill='none' stroke='%2341e8ff' stroke-width='4'/%3E%3Cpath d='M22 22h20v20H22z' fill='%23ffe45c'/%3E%3Cpath d='M42 22h8v28h-8z' fill='%23ff3df2'/%3E%3C/svg%3E">
 </head>
 <body>
-  <main class="cosmic-shell" aria-label="Cosmic Reactor Tetris">
-    <section class="hero-copy" aria-label="Game identity">
-      <p class="eyebrow">Cosmic Reactor</p>
-      <h1>Reactor Tetris</h1>
-      <p class="hero-lede">Charge the core with line clears, keep the combo chain alive, and detonate plasma bursts before the stack reaches orbit.</p>
-      <div class="hero-metrics" aria-label="Saved records">
+  <main id="app" class="arcade-app" data-view="hangar" aria-label="Cosmic Reactor Tetris">
+    <section id="hangar-screen" class="app-screen hangar-screen">
+      <div class="hangar-poster" id="hangar-poster" aria-hidden="true"></div>
+      <div class="hangar-command">
+        <p class="eyebrow">Cosmic Reactor</p>
+        <h1>Reactor Campaign</h1>
+        <p class="hangar-copy">Choose a reactor phase, clear objectives, and climb the arcade ladder through hazard-heavy Tetris runs.</p>
+        <div class="selected-phase">
+          <span>Selected Phase</span>
+          <strong id="hangar-phase-title">Ignition Array</strong>
+          <p id="hangar-phase-tagline">Warm the core.</p>
+        </div>
+        <div class="hangar-actions">
+          <button class="primary-action" type="button" data-app-action="start-selected">Start Run</button>
+          <button class="secondary-action" type="button" data-app-action="open-phases">Phase Select</button>
+          <button class="secondary-action" type="button" data-app-action="open-settings">Settings</button>
+        </div>
+      </div>
+      <div class="hangar-metrics" aria-label="Campaign records">
         <div>
           <span>High Score</span>
-          <strong id="high-score">0</strong>
+          <strong id="hangar-high-score">0</strong>
         </div>
         <div>
           <span>Best Combo</span>
-          <strong id="best-combo">0</strong>
+          <strong id="hangar-best-combo">0</strong>
+        </div>
+        <div>
+          <span>Unlocked</span>
+          <strong id="hangar-unlocked">1/5</strong>
+        </div>
+        <div>
+          <span>Objectives</span>
+          <strong id="hangar-objectives">0</strong>
         </div>
       </div>
     </section>
 
-    <section class="reactor-stage" aria-label="Playable reactor board">
-      <div id="pixi-stage" class="pixi-stage"></div>
-      <div id="overlay" class="overlay">
-        <p class="eyebrow" id="overlay-eyebrow">Ready</p>
-        <h2 id="overlay-title">Reactor Tetris</h2>
-        <p id="overlay-text">Press Enter or engage the reactor to start the cinematic launch.</p>
-        <button id="primary-action" class="primary-action" type="button">Engage Reactor</button>
-      </div>
+    <section id="phase-screen" class="app-screen phase-screen" hidden>
+      <header class="screen-header">
+        <div>
+          <p class="eyebrow">Phase Ladder</p>
+          <h1>Reactor Phases</h1>
+        </div>
+        <div class="screen-actions">
+          <button class="secondary-action" type="button" data-app-action="back-hangar">Hangar</button>
+          <button class="primary-action" type="button" data-app-action="start-selected">Start Selected</button>
+        </div>
+      </header>
+      <div id="phase-grid" class="phase-grid" aria-label="Available reactor phases"></div>
     </section>
 
-    <aside class="telemetry-panel" aria-label="Game telemetry">
-      <div class="brand-row">
-        <span class="brand-mark" aria-hidden="true"></span>
-        <div>
-          <p class="eyebrow">Live Core</p>
-          <h2 id="state-label">Ready</h2>
-        </div>
-        <button id="mute-button" class="icon-button" type="button" aria-pressed="false">Sound On</button>
-      </div>
-
-      <div class="stats">
-        <div>
-          <span>Score</span>
-          <strong id="score">0</strong>
-        </div>
-        <div>
-          <span>Level</span>
-          <strong id="level">1</strong>
-        </div>
-        <div>
-          <span>Lines</span>
-          <strong id="lines">0</strong>
-        </div>
-      </div>
-
-      <div class="reactor-meter" aria-label="Reactor charge">
-        <div>
-          <span>Reactor Charge</span>
-          <strong id="reactor-value">0%</strong>
-        </div>
-        <div class="meter-track"><span id="reactor-fill"></span></div>
-      </div>
-
-      <div class="combo-strip" aria-label="Combo and back-to-back state">
-        <div>
-          <span>Combo</span>
-          <strong id="combo">0</strong>
-        </div>
-        <div>
-          <span>Back-to-back</span>
-          <strong id="back-to-back">0</strong>
-        </div>
-      </div>
-
-      <div class="preview-grid">
-        <section class="preview-card">
-          <h3>Next</h3>
-          <div id="next-preview" class="preview-board" aria-label="Next piece"></div>
-        </section>
-        <section class="preview-card">
-          <h3>Hold</h3>
-          <div id="hold-preview" class="preview-board" aria-label="Held piece"></div>
-        </section>
-      </div>
-
-      <section class="controls" aria-label="Controls">
-        <h3>Keys</h3>
-        <dl>
-          <div><dt>Left / Right</dt><dd>Move</dd></div>
-          <div><dt>Up</dt><dd>Rotate</dd></div>
-          <div><dt>Down</dt><dd>Soft drop</dd></div>
-          <div><dt>Space</dt><dd>Hard drop</dd></div>
-          <div><dt>C / Shift</dt><dd>Hold</dd></div>
-          <div><dt>P</dt><dd>Pause</dd></div>
-          <div><dt>Enter</dt><dd>Start / Restart</dd></div>
-        </dl>
+    <section id="game-screen" class="app-screen cosmic-shell game-screen" hidden aria-label="Playable reactor board">
+      <section class="hero-copy" aria-label="Phase telemetry">
+        <p class="eyebrow">Active Phase</p>
+        <h1 id="phase-title">Ignition Array</h1>
+        <p id="phase-tagline" class="hero-lede">Warm the core.</p>
+        <div class="hazard-chip" id="hazard-chip">Channel clear</div>
+        <ul id="objective-list" class="objective-list" aria-label="Phase objectives"></ul>
       </section>
-    </aside>
 
-    <nav class="touch-controls" aria-label="Touch controls">
-      <button type="button" data-action="move-left">Left</button>
-      <button type="button" data-action="move-right">Right</button>
-      <button type="button" data-action="rotate">Rotate</button>
-      <button type="button" data-action="soft-drop">Soft</button>
-      <button type="button" data-action="hard-drop">Drop</button>
-      <button type="button" data-action="hold">Hold</button>
-      <button type="button" data-action="pause">Pause</button>
-    </nav>
+      <section class="reactor-stage" aria-label="Game field">
+        <div id="pixi-stage" class="pixi-stage"></div>
+        <div id="overlay" class="overlay">
+          <p class="eyebrow" id="overlay-eyebrow">Ready</p>
+          <h2 id="overlay-title">Reactor Tetris</h2>
+          <p id="overlay-text">Press Enter or engage the reactor to start the cinematic launch.</p>
+          <button id="primary-action" class="primary-action" type="button">Engage Reactor</button>
+        </div>
+      </section>
+
+      <aside class="telemetry-panel" aria-label="Game telemetry">
+        <div class="brand-row">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div>
+            <p class="eyebrow">Live Core</p>
+            <h2 id="state-label">Ready</h2>
+          </div>
+          <button id="mute-button" class="icon-button" type="button" aria-pressed="false">Sound On</button>
+        </div>
+
+        <div class="stats">
+          <div>
+            <span>Score</span>
+            <strong id="score">0</strong>
+          </div>
+          <div>
+            <span>Level</span>
+            <strong id="level">1</strong>
+          </div>
+          <div>
+            <span>Lines</span>
+            <strong id="lines">0</strong>
+          </div>
+        </div>
+
+        <div class="reactor-meter" aria-label="Reactor charge">
+          <div>
+            <span>Reactor Charge</span>
+            <strong id="reactor-value">0%</strong>
+          </div>
+          <div class="meter-track"><span id="reactor-fill"></span></div>
+        </div>
+
+        <div class="combo-strip" aria-label="Combo and back-to-back state">
+          <div>
+            <span>Combo</span>
+            <strong id="combo">0</strong>
+          </div>
+          <div>
+            <span>Back-to-back</span>
+            <strong id="back-to-back">0</strong>
+          </div>
+        </div>
+
+        <div class="preview-grid">
+          <section class="preview-card">
+            <h3>Next</h3>
+            <div id="next-preview" class="preview-board" aria-label="Next piece"></div>
+          </section>
+          <section class="preview-card">
+            <h3>Hold</h3>
+            <div id="hold-preview" class="preview-board" aria-label="Held piece"></div>
+          </section>
+        </div>
+
+        <div class="game-actions">
+          <button class="secondary-action" type="button" data-action="pause">Pause</button>
+        </div>
+      </aside>
+
+      <nav class="touch-controls" aria-label="Touch controls">
+        <button type="button" data-action="move-left">Left</button>
+        <button type="button" data-action="move-right">Right</button>
+        <button type="button" data-action="rotate">Rotate</button>
+        <button type="button" data-action="soft-drop">Soft</button>
+        <button type="button" data-action="hard-drop">Drop</button>
+        <button type="button" data-action="hold">Hold</button>
+        <button type="button" data-action="pause">Pause</button>
+      </nav>
+    </section>
+
+    <section id="results-screen" class="app-screen results-screen" hidden>
+      <div class="results-panel">
+        <p class="eyebrow">Run Results</p>
+        <h1 id="results-title">Core Collapse</h1>
+        <p id="results-phase" class="results-phase">Ignition Array</p>
+        <div class="results-grid">
+          <div><span>Score</span><strong id="results-score">0</strong></div>
+          <div><span>Lines</span><strong id="results-lines">0</strong></div>
+          <div><span>Best Combo</span><strong id="results-combo">0</strong></div>
+          <div><span>High Score</span><strong id="results-high-score">0</strong></div>
+          <div><span>Objectives</span><strong id="results-objectives">0/3</strong></div>
+        </div>
+        <ul id="results-log" class="results-log"></ul>
+        <div class="hangar-actions">
+          <button class="primary-action" type="button" data-app-action="retry-phase">Retry Phase</button>
+          <button class="secondary-action" type="button" data-app-action="open-phases">Phase Select</button>
+          <button class="secondary-action" type="button" data-app-action="back-hangar">Hangar</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="settings-screen" class="app-screen settings-screen" hidden>
+      <div class="settings-panel">
+        <p class="eyebrow">Settings</p>
+        <h1>Cabinet Setup</h1>
+        <div class="settings-row">
+          <div>
+            <span>Audio</span>
+            <strong id="settings-mute-label">Sound On</strong>
+          </div>
+          <button id="settings-mute-button" class="secondary-action" type="button" data-app-action="toggle-audio" aria-pressed="false">Sound On</button>
+        </div>
+        <div class="settings-row">
+          <div>
+            <span>Unlocked Phases</span>
+            <strong id="settings-unlocked">1/5</strong>
+          </div>
+        </div>
+        <button class="primary-action" type="button" data-app-action="back-hangar">Back to Hangar</button>
+      </div>
+    </section>
   </main>
 
   <script type="module" src="/src/main.js"></script>

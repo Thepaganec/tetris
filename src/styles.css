@@ -12,6 +12,10 @@
   --yellow: #ffe45c;
   --green: #46ff8f;
   --danger: #ff426d;
+  --phase-primary: #ffe45c;
+  --phase-secondary: #ff426d;
+  --phase-accent: #41e8ff;
+  --phase-backdrop: none;
 }
 
 * {
@@ -38,11 +42,314 @@ button {
   font: inherit;
 }
 
-.cosmic-shell {
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.arcade-app {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.arcade-app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(90deg, rgba(3, 5, 16, 0.92), rgba(3, 5, 16, 0.5), rgba(3, 5, 16, 0.94)),
+    var(--phase-backdrop),
+    linear-gradient(135deg, #02040c, #081323 52%, #160b23);
+  background-size: cover;
+  background-position: center;
+}
+
+.arcade-app::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 4px),
+    radial-gradient(circle at 50% 52%, color-mix(in srgb, var(--phase-primary) 16%, transparent), transparent 36%);
+  opacity: 0.58;
+  pointer-events: none;
+}
+
+.app-screen[hidden] {
+  display: none !important;
+}
+
+.app-screen {
   width: min(1180px, calc(100vw - 32px));
   min-height: 100vh;
   margin: 0 auto;
   padding: 28px 0;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--phase-accent);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.primary-action,
+.secondary-action,
+.icon-button,
+.touch-controls button {
+  min-height: 42px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--text);
+  background: rgba(65, 232, 255, 0.12);
+  cursor: pointer;
+}
+
+.primary-action {
+  min-width: 154px;
+  padding: 0 18px;
+  color: #021018;
+  background: var(--phase-primary);
+  border-color: color-mix(in srgb, var(--phase-primary) 72%, white);
+  font-weight: 900;
+  box-shadow: 0 0 30px color-mix(in srgb, var(--phase-primary) 34%, transparent);
+}
+
+.secondary-action,
+.icon-button {
+  padding: 0 14px;
+  color: var(--phase-accent);
+}
+
+.hangar-screen {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(330px, 1fr) minmax(230px, 0.55fr);
+  gap: 22px;
+  align-items: center;
+}
+
+.hangar-poster {
+  min-height: min(680px, calc(100vh - 72px));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(3, 5, 16, 0.08), rgba(3, 5, 16, 0.42)),
+    var(--phase-backdrop);
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.42);
+}
+
+.hangar-command,
+.hangar-metrics,
+.hero-copy,
+.telemetry-panel,
+.reactor-stage,
+.results-panel,
+.settings-panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+}
+
+.hangar-command {
+  padding: clamp(22px, 4vw, 42px);
+}
+
+.hangar-command h1,
+.screen-header h1,
+.results-panel h1,
+.settings-panel h1 {
+  margin: 10px 0 14px;
+  font-size: clamp(38px, 7vw, 72px);
+  line-height: 0.94;
+  letter-spacing: 0;
+}
+
+.hangar-copy,
+.hero-lede,
+.results-phase,
+.selected-phase p {
+  margin: 0;
+  max-width: 42ch;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.selected-phase {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.11);
+}
+
+.selected-phase span,
+.hangar-metrics span,
+.stats span,
+.combo-strip span,
+.reactor-meter span,
+.results-grid span,
+.settings-row span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.selected-phase strong {
+  display: block;
+  margin: 6px 0;
+  color: var(--phase-primary);
+  font-size: 24px;
+}
+
+.hangar-actions,
+.screen-actions,
+.game-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+.hangar-metrics {
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.hangar-metrics div,
+.results-grid div,
+.stats div,
+.combo-strip div,
+.preview-card,
+.settings-row {
+  min-width: 0;
+  border: 1px solid rgba(116, 238, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(14, 25, 47, 0.72);
+}
+
+.hangar-metrics div,
+.results-grid div {
+  padding: 16px;
+}
+
+.hangar-metrics strong,
+.results-grid strong,
+.stats strong,
+.combo-strip strong,
+.reactor-meter strong,
+.settings-row strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--text);
+  font-size: 24px;
+  line-height: 1;
+}
+
+.screen-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.phase-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(170px, 1fr));
+  gap: 14px;
+}
+
+.phase-card {
+  min-width: 0;
+  min-height: 520px;
+  padding: 0;
+  overflow: hidden;
+  text-align: left;
+  border: 1px solid rgba(116, 238, 255, 0.18);
+  border-radius: 8px;
+  color: var(--text);
+  background: rgba(7, 13, 25, 0.9);
+}
+
+.phase-card.selected {
+  border-color: var(--phase-primary);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--phase-primary) 40%, transparent);
+}
+
+.phase-card.locked {
+  filter: grayscale(0.9);
+}
+
+.phase-poster {
+  display: block;
+  height: 230px;
+  background-size: cover;
+  background-position: center;
+}
+
+.phase-card-body {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+.phase-index {
+  color: var(--phase-accent);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.phase-card strong {
+  font-size: 20px;
+  line-height: 1.08;
+}
+
+.phase-card span {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.phase-card-records {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.objective-mini {
+  display: grid;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.objective-mini span,
+.objective-list li,
+.results-log li {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.objective-mini span.done,
+.objective-list li.complete {
+  color: #021018;
+  background: var(--phase-primary);
+  border-color: transparent;
+  font-weight: 900;
+}
+
+.cosmic-shell {
   display: grid;
   grid-template-columns: minmax(230px, 0.72fr) minmax(330px, 520px) minmax(286px, 0.85fr);
   gap: 20px;
@@ -53,107 +360,65 @@ button {
   min-width: 0;
 }
 
-.hero-copy,
-.telemetry-panel,
-.reactor-stage {
-  border: 1px solid var(--line);
-  background: var(--panel);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
-}
-
 .hero-copy {
   min-height: 520px;
   padding: 24px;
-  border-radius: 8px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  position: relative;
-}
-
-.hero-copy::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  border: 1px solid rgba(255, 61, 242, 0.18);
-  pointer-events: none;
-}
-
-.eyebrow {
-  margin: 0;
-  color: var(--cyan);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0;
-  text-transform: uppercase;
 }
 
 .hero-copy h1 {
-  max-width: 8ch;
+  max-width: 9ch;
   margin: 12px 0 16px;
-  font-size: 54px;
+  color: var(--phase-primary);
+  font-size: 50px;
   line-height: 0.92;
   letter-spacing: 0;
 }
 
-.hero-lede {
-  margin: 0;
-  max-width: 34ch;
-  color: var(--muted);
-  font-size: 16px;
-  line-height: 1.55;
-}
-
-.hero-metrics {
-  margin-top: 26px;
+.hazard-chip {
+  margin-top: 20px;
+  min-height: 40px;
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-}
-
-.hero-metrics div,
-.stats div,
-.combo-strip div,
-.preview-card,
-.controls {
-  border: 1px solid rgba(116, 238, 255, 0.16);
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--phase-secondary) 52%, transparent);
   border-radius: 8px;
-  background: rgba(14, 25, 47, 0.72);
+  color: var(--phase-primary);
+  background: rgba(255, 255, 255, 0.055);
+  font-size: 13px;
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
 }
 
-.hero-metrics div {
-  padding: 14px;
+.hazard-chip[data-alert="warning"] {
+  color: #ffffff;
+  background: color-mix(in srgb, var(--phase-secondary) 32%, rgba(3, 5, 16, 0.86));
+  animation: hazard-pulse 320ms steps(2) infinite;
 }
 
-.hero-metrics span,
-.stats span,
-.combo-strip span,
-.reactor-meter span {
-  display: block;
+.objective-list,
+.results-log {
+  margin: 18px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  list-style: none;
+}
+
+.objective-list li {
   color: var(--muted);
-  font-size: 12px;
-}
-
-.hero-metrics strong,
-.stats strong,
-.combo-strip strong,
-.reactor-meter strong {
-  display: block;
-  margin-top: 5px;
-  color: var(--text);
-  font-size: 24px;
-  line-height: 1;
+  font-size: 13px;
 }
 
 .reactor-stage {
   min-height: 680px;
   height: min(760px, calc(100vh - 56px));
-  border-radius: 8px;
   position: relative;
   overflow: hidden;
   background:
-    linear-gradient(180deg, rgba(3, 5, 16, 0.76), rgba(4, 10, 22, 0.94)),
+    linear-gradient(180deg, rgba(3, 5, 16, 0.56), rgba(4, 10, 22, 0.94)),
     #030510;
 }
 
@@ -177,7 +442,7 @@ button {
   gap: 10px;
   padding: 30px;
   text-align: center;
-  border: 1px solid rgba(255, 61, 242, 0.32);
+  border: 1px solid color-mix(in srgb, var(--phase-secondary) 42%, transparent);
   border-radius: 8px;
   background: rgba(3, 5, 16, 0.78);
   backdrop-filter: blur(6px);
@@ -199,38 +464,9 @@ button {
   color: var(--muted);
 }
 
-.primary-action,
-.icon-button,
-.touch-controls button {
-  min-height: 42px;
-  border: 1px solid var(--line-strong);
-  border-radius: 8px;
-  color: var(--text);
-  background: rgba(65, 232, 255, 0.12);
-  cursor: pointer;
-}
-
-.primary-action {
-  justify-self: center;
-  min-width: 168px;
-  margin-top: 10px;
-  padding: 0 18px;
-  color: #021018;
-  background: var(--cyan);
-  font-weight: 900;
-  box-shadow: 0 0 30px rgba(65, 232, 255, 0.34);
-}
-
-.icon-button {
-  min-width: 96px;
-  padding: 0 10px;
-  color: var(--cyan);
-}
-
 .telemetry-panel {
   min-height: 640px;
   padding: 18px;
-  border-radius: 8px;
   background: linear-gradient(180deg, rgba(12, 22, 42, 0.94), rgba(6, 12, 25, 0.92));
 }
 
@@ -247,10 +483,10 @@ button {
   height: 36px;
   border-radius: 8px;
   background:
-    linear-gradient(90deg, transparent 0 30%, var(--cyan) 30% 68%, transparent 68%),
-    linear-gradient(0deg, transparent 0 30%, var(--pink) 30% 68%, transparent 68%),
+    linear-gradient(90deg, transparent 0 30%, var(--phase-accent) 30% 68%, transparent 68%),
+    linear-gradient(0deg, transparent 0 30%, var(--phase-secondary) 30% 68%, transparent 68%),
     #07111e;
-  box-shadow: 0 0 24px rgba(65, 232, 255, 0.35);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--phase-accent) 35%, transparent);
 }
 
 .brand-row h2 {
@@ -273,14 +509,13 @@ button {
 
 .stats div,
 .combo-strip div {
-  min-width: 0;
   padding: 12px;
 }
 
 .reactor-meter {
   margin-bottom: 12px;
   padding: 14px;
-  border: 1px solid rgba(255, 61, 242, 0.22);
+  border: 1px solid color-mix(in srgb, var(--phase-secondary) 30%, transparent);
   border-radius: 8px;
   background: rgba(19, 9, 31, 0.72);
 }
@@ -304,8 +539,8 @@ button {
   display: block;
   width: 0;
   height: 100%;
-  background: linear-gradient(90deg, var(--cyan), var(--green), var(--pink));
-  box-shadow: 0 0 18px rgba(255, 61, 242, 0.5);
+  background: linear-gradient(90deg, var(--phase-accent), var(--green), var(--phase-secondary));
+  box-shadow: 0 0 18px color-mix(in srgb, var(--phase-secondary) 50%, transparent);
   transition: width 120ms linear;
 }
 
@@ -320,10 +555,9 @@ button {
   padding: 12px;
 }
 
-.preview-card h3,
-.controls h3 {
+.preview-card h3 {
   margin: 0 0 10px;
-  color: var(--cyan);
+  color: var(--phase-accent);
   font-size: 13px;
   text-transform: uppercase;
 }
@@ -351,39 +585,63 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.32);
 }
 
-.controls {
-  padding: 14px;
-}
-
-.controls dl {
-  margin: 0;
-  display: grid;
-  gap: 8px;
-}
-
-.controls div {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.controls dt {
-  color: var(--text);
-  font-weight: 700;
-}
-
-.controls dd {
-  margin: 0;
-}
-
 .touch-controls {
   display: none;
 }
 
-@media (max-width: 1040px) {
+.results-screen,
+.settings-screen {
+  display: grid;
+  place-items: center;
+}
+
+.results-panel,
+.settings-panel {
+  width: min(720px, 100%);
+  padding: clamp(22px, 4vw, 38px);
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.settings-row {
+  margin: 18px 0;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+@keyframes hazard-pulse {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.8);
+  }
+}
+
+@media (max-width: 1120px) {
+  .phase-grid {
+    grid-template-columns: repeat(3, minmax(210px, 1fr));
+  }
+
+  .hangar-screen {
+    grid-template-columns: minmax(310px, 0.9fr) minmax(320px, 1fr);
+    align-items: start;
+  }
+
+  .hangar-metrics {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(4, 1fr);
+  }
+
   .cosmic-shell {
     grid-template-columns: minmax(310px, 520px) minmax(280px, 360px);
     align-items: start;
@@ -397,34 +655,56 @@ button {
   .hero-copy h1 {
     max-width: none;
   }
-
-  .hero-metrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 760px) {
-  body {
-    overflow-x: hidden;
-  }
-
-  .cosmic-shell {
+  .app-screen {
     width: calc(100% - 20px);
-    max-width: 460px;
-    grid-template-columns: 1fr;
+    max-width: 480px;
     padding: 10px 0 96px;
   }
 
-  .hero-copy {
+  .hangar-screen,
+  .cosmic-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .hangar-poster {
+    min-height: 280px;
+  }
+
+  .hangar-command,
+  .hero-copy,
+  .telemetry-panel,
+  .results-panel,
+  .settings-panel {
     padding: 18px;
   }
 
-  .hero-copy h1 {
+  .hangar-command h1,
+  .screen-header h1,
+  .results-panel h1,
+  .settings-panel h1 {
     font-size: 42px;
   }
 
-  .hero-metrics {
+  .hangar-metrics,
+  .results-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .screen-header,
+  .settings-row {
+    display: grid;
+    align-items: start;
+  }
+
+  .phase-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .phase-card {
+    min-height: auto;
   }
 
   .reactor-stage {
@@ -451,19 +731,21 @@ button {
     max-width: 27ch;
   }
 
-  .primary-action {
+  .primary-action,
+  .secondary-action {
     max-width: 100%;
   }
 
   .stats strong,
   .combo-strip strong,
-  .hero-metrics strong,
-  .reactor-meter strong {
+  .hangar-metrics strong,
+  .reactor-meter strong,
+  .results-grid strong {
     font-size: 21px;
   }
 
-  body[data-game-state="playing"] .touch-controls,
-  body[data-game-state="paused"] .touch-controls {
+  body[data-view="playing"] .touch-controls,
+  body[data-view="paused"] .touch-controls {
     position: fixed;
     z-index: 5;
     left: 10px;
@@ -488,17 +770,22 @@ button {
 }
 
 @media (max-width: 430px) {
-  .hero-metrics,
+  .hangar-metrics,
   .combo-strip,
   .preview-grid,
-  .stats {
+  .stats,
+  .results-grid {
     grid-template-columns: 1fr;
   }
 
-  .hero-copy h1 {
+  .hangar-command h1,
+  .hero-copy h1,
+  .results-panel h1,
+  .settings-panel h1 {
     font-size: 36px;
   }
 
+  .hangar-copy,
   .hero-lede {
     font-size: 15px;
   }
@@ -512,7 +799,8 @@ button {
     width: 100%;
   }
 
-  .touch-controls {
+  body[data-view="playing"] .touch-controls,
+  body[data-view="paused"] .touch-controls {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

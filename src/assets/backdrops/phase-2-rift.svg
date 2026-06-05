@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="Retro arcade neon rift backdrop">
+  <defs>
+    <radialGradient id="rift" cx="52%" cy="48%" r="62%">
+      <stop offset="0%" stop-color="#41e8ff" stop-opacity=".9"/>
+      <stop offset="19%" stop-color="#4777ff" stop-opacity=".68"/>
+      <stop offset="42%" stop-color="#c451ff" stop-opacity=".48"/>
+      <stop offset="78%" stop-color="#07111e" stop-opacity=".9"/>
+      <stop offset="100%" stop-color="#02040c"/>
+    </radialGradient>
+    <linearGradient id="scan" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#41e8ff" stop-opacity=".05"/>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity=".14"/>
+      <stop offset="100%" stop-color="#ff3df2" stop-opacity=".05"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="#02040c"/>
+  <rect width="1600" height="1000" fill="url(#rift)"/>
+  <g fill="none" stroke="#41e8ff" stroke-width="5" opacity=".48">
+    <path d="M200 120C380 300 520 370 760 410s390 160 620 420"/>
+    <path d="M1420 80C1210 280 1060 350 835 420S440 590 230 900" stroke="#ff3df2"/>
+    <path d="M350 60h900l180 230-280 560H450L170 290z" opacity=".28"/>
+  </g>
+  <g transform="translate(800 490)" fill="none">
+    <path d="M-90-310 135-135-45-72 170 115-75 80 55 315" stroke="#ffe45c" stroke-width="16" opacity=".8"/>
+    <path d="M-140-300 55-125-105-82 105 105-130 72-10 300" stroke="#ffffff" stroke-width="4" opacity=".45"/>
+    <circle r="270" stroke="#41e8ff" stroke-width="8" opacity=".36"/>
+    <circle r="360" stroke="#ff3df2" stroke-width="4" opacity=".28"/>
+  </g>
+  <g opacity=".38">
+    <rect x="0" y="0" width="1600" height="1000" fill="url(#scan)"/>
+    <path d="M0 210h1600M0 330h1600M0 450h1600M0 570h1600M0 690h1600M0 810h1600" stroke="#ffffff" stroke-width="2" opacity=".1"/>
+  </g>
+</svg>

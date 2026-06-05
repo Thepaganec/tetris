@@ -8,6 +8,25 @@ import {
   TETROMINO_TYPES
 } from "./constants.js";
 
+const CLASSIC_PHASE = {
+  id: "classic",
+  title: "Classic Reactor",
+  hazards: [],
+  difficulty: {
+    gravityMultiplier: 1,
+    hazardInitialDelay: 0,
+    hazardMinInterval: 0,
+    hazardMaxInterval: 0,
+    warningDuration: 0,
+    speedMultiplier: 1,
+    speedDuration: 0,
+    surgeGain: 0,
+    corruptionCells: 0,
+    lockCells: 0,
+    lockDuration: 0
+  }
+};
+
 /** Управляет правилами Tetris и публикует события для renderer-а, UI и audio. */
 export class TetrisGame {
   constructor() {
@@ -33,16 +52,33 @@ export class TetrisGame {
     this.state = "ready";
     this.dropTimer = 0;
     this.reactorDecayTimer = 0;
+    this.activePhase = CLASSIC_PHASE;
+    this.hazardTimer = 0;
+    this.hazardCursor = 0;
+    this.pendingHazard = null;
+    this.speedSpikeRemaining = 0;
+    this.lockedZone = null;
     this.events = [];
     fillQueue(this);
   }
 
   /** Запускает новую партию и создаёт первую фигуру. */
-  startGame() {
+  startGame(phase = CLASSIC_PHASE) {
     this.resetToReady();
+    this.activePhase = normalizePhase(phase);
+    this.hazardTimer = this.getNextHazardDelay(true);
     this.state = "playing";
     this.spawnPiece();
-    this.emit("gameStart");
+    this.emit("phaseStarted", {
+      phaseId: this.activePhase.id,
+      phaseTitle: this.activePhase.title,
+      phase: this.activePhase
+    });
+    this.emit("phaseLoopChanged", {
+      phaseId: this.activePhase.id,
+      loop: this.activePhase.loop || null
+    });
+    this.emit("gameStart", { phaseId: this.activePhase.id });
   }
 
   /** Обновляет автоматическое падение и плавный спад заряда реактора. */
@@ -51,12 +87,13 @@ export class TetrisGame {
 
     this.dropTimer += delta;
     this.reactorDecayTimer += delta;
+    this.updateHazards(delta);
     if (this.reactorDecayTimer >= 250) {
       this.reactorCharge = Math.max(0, this.reactorCharge - 0.45);
       this.reactorDecayTimer = 0;
     }
 
-    if (this.dropTimer >= this.getDropInterval()) {
+    if (this.dropTimer >= this.getEffectiveDropInterval()) {
       if (!this.collides(this.current, this.current.x, this.current.y + 1, this.current.rotation)) {
         this.current.y += 1;
       } else {
@@ -176,6 +213,23 @@ export class TetrisGame {
       bestComboThisRun: this.bestComboThisRun,
       backToBack: this.backToBack,
       reactorCharge: this.reactorCharge,
+      phase: {
+        id: this.activePhase.id,
+        title: this.activePhase.title,
+        palette: this.activePhase.palette || null
+      },
+      hazardWarning: this.pendingHazard ? {
+        type: this.pendingHazard.type,
+        label: this.pendingHazard.label,
+        remaining: this.pendingHazard.warningRemaining,
+        duration: this.pendingHazard.warningDuration,
+        cells: this.pendingHazard.cells,
+        rows: this.pendingHazard.rows
+      } : null,
+      activeHazards: {
+        speedSpike: this.speedSpikeRemaining > 0,
+        lockedZone: this.lockedZone ? this.lockedZone.cells : []
+      },
       state: this.state
     };
   }
@@ -190,6 +244,15 @@ export class TetrisGame {
   /** Возвращает интервал автоматического падения для текущего уровня. */
   getDropInterval() {
     return Math.max(90, 820 - (this.level - 1) * 68);
+  }
+
+  /** Возвращает интервал падения с учётом фазы и активных hazards. */
+  getEffectiveDropInterval() {
+    const phaseMultiplier = this.activePhase.difficulty.gravityMultiplier || 1;
+    const speedMultiplier = this.speedSpikeRemaining > 0
+      ? this.activePhase.difficulty.speedMultiplier || 1
+      : 1;
+    return Math.max(55, this.getDropInterval() * phaseMultiplier * speedMultiplier);
   }
 
   /** Создаёт координаты занятых клеток фигуры. */
@@ -288,6 +351,163 @@ export class TetrisGame {
 
     this.spawnPiece();
     this.emit("scoreChanged", this.getSnapshot());
+  }
+
+  updateHazards(delta) {
+    this.updateActiveHazards(delta);
+    if (!this.activePhase.hazards.length) return;
+
+    if (this.pendingHazard) {
+      this.pendingHazard.warningRemaining -= delta;
+      if (this.pendingHazard.warningRemaining <= 0) {
+        const hazard = this.pendingHazard;
+        this.pendingHazard = null;
+        this.applyHazard(hazard);
+        this.hazardTimer = this.getNextHazardDelay(false);
+      }
+      return;
+    }
+
+    this.hazardTimer -= delta;
+    if (this.hazardTimer <= 0) {
+      this.startHazardWarning();
+    }
+  }
+
+  updateActiveHazards(delta) {
+    this.speedSpikeRemaining = Math.max(0, this.speedSpikeRemaining - delta);
+    if (!this.lockedZone) return;
+
+    this.lockedZone.remaining -= delta;
+    if (this.lockedZone.remaining > 0) return;
+
+    this.lockedZone.cells.forEach((cell) => {
+      if (this.board[cell.y] && this.board[cell.y][cell.x] === "X") {
+        this.board[cell.y][cell.x] = null;
+      }
+    });
+    this.emit("hazardExpired", { hazardType: "lockedZone", cells: this.lockedZone.cells });
+    this.lockedZone = null;
+  }
+
+  startHazardWarning() {
+    const hazardType = this.activePhase.hazards[this.hazardCursor % this.activePhase.hazards.length];
+    this.hazardCursor += 1;
+    const warningDuration = this.activePhase.difficulty.warningDuration || 900;
+    const hazard = this.createHazard(hazardType, warningDuration);
+    this.pendingHazard = hazard;
+    this.emit("hazardWarning", {
+      phaseId: this.activePhase.id,
+      hazardType: hazard.type,
+      label: hazard.label,
+      warningDuration: hazard.warningDuration,
+      cells: hazard.cells,
+      rows: hazard.rows
+    });
+  }
+
+  createHazard(hazardType, warningDuration) {
+    if (hazardType === "rowCorruption") {
+      const cells = this.pickCorruptionCells(this.activePhase.difficulty.corruptionCells || 4);
+      return {
+        type: hazardType,
+        label: "Row corruption",
+        warningDuration,
+        warningRemaining: warningDuration,
+        cells,
+        rows: uniqueRows(cells)
+      };
+    }
+
+    if (hazardType === "lockedZone") {
+      const cells = this.pickLockedZoneCells(this.activePhase.difficulty.lockCells || 4);
+      return {
+        type: hazardType,
+        label: "Locked zone",
+        warningDuration,
+        warningRemaining: warningDuration,
+        cells,
+        rows: uniqueRows(cells)
+      };
+    }
+
+    return {
+      type: hazardType,
+      label: hazardType === "speedSpike" ? "Gravity spike" : "Reactor surge",
+      warningDuration,
+      warningRemaining: warningDuration,
+      cells: [],
+      rows: []
+    };
+  }
+
+  applyHazard(hazard) {
+    if (hazard.type === "speedSpike") {
+      this.speedSpikeRemaining = this.activePhase.difficulty.speedDuration || 4200;
+    }
+    if (hazard.type === "reactorSurge") {
+      this.reactorCharge = Math.min(100, this.reactorCharge + (this.activePhase.difficulty.surgeGain || 20));
+    }
+    if (hazard.type === "rowCorruption") {
+      hazard.cells.forEach((cell) => {
+        if (this.board[cell.y] && !this.board[cell.y][cell.x]) {
+          this.board[cell.y][cell.x] = "X";
+        }
+      });
+    }
+    if (hazard.type === "lockedZone") {
+      hazard.cells.forEach((cell) => {
+        if (this.board[cell.y] && !this.board[cell.y][cell.x]) {
+          this.board[cell.y][cell.x] = "X";
+        }
+      });
+      this.lockedZone = {
+        cells: hazard.cells,
+        remaining: this.activePhase.difficulty.lockDuration || 4200
+      };
+    }
+
+    this.emit("hazardApplied", {
+      phaseId: this.activePhase.id,
+      hazardType: hazard.type,
+      label: hazard.label,
+      cells: hazard.cells,
+      rows: hazard.rows,
+      reactorCharge: this.reactorCharge
+    });
+  }
+
+  getNextHazardDelay(isInitial) {
+    if (!this.activePhase.hazards.length) return Number.POSITIVE_INFINITY;
+    const difficulty = this.activePhase.difficulty;
+    if (isInitial) return difficulty.hazardInitialDelay || difficulty.hazardMinInterval || 8000;
+    const min = difficulty.hazardMinInterval || 7000;
+    const max = Math.max(min, difficulty.hazardMaxInterval || min);
+    const span = max - min;
+    return min + (span * ((this.hazardCursor % 4) / 3));
+  }
+
+  pickCorruptionCells(count) {
+    const cells = [];
+    const startY = Math.max(ROWS - 6, 0);
+    for (let y = ROWS - 1; y >= startY && cells.length < count; y -= 1) {
+      for (let x = (y + this.hazardCursor) % 2; x < COLS && cells.length < count; x += 3) {
+        if (!this.board[y][x]) cells.push({ x, y, type: "X" });
+      }
+    }
+    return cells;
+  }
+
+  pickLockedZoneCells(count) {
+    const cells = [];
+    const centerX = 4 + (this.hazardCursor % 2);
+    const startY = Math.max(ROWS - 9, 2);
+    for (let y = startY; y < ROWS - 2 && cells.length < count; y += 2) {
+      for (let x = centerX - 1; x <= centerX + 1 && cells.length < count; x += 1) {
+        if (x >= 0 && x < COLS && !this.board[y][x]) cells.push({ x, y, type: "X" });
+      }
+    }
+    return cells;
   }
 
   findFullRows() {
@@ -408,4 +628,20 @@ function shuffle(values) {
     result[j] = temp;
   }
   return result;
+}
+
+function normalizePhase(phase) {
+  return {
+    ...CLASSIC_PHASE,
+    ...phase,
+    difficulty: {
+      ...CLASSIC_PHASE.difficulty,
+      ...(phase && phase.difficulty ? phase.difficulty : {})
+    },
+    hazards: Array.isArray(phase && phase.hazards) ? phase.hazards.slice() : []
+  };
+}
+
+function uniqueRows(cells) {
+  return Array.from(new Set(cells.map((cell) => cell.y)));
 }
