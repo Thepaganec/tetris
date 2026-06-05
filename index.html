@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cosmic Reactor Tetris</title>
+</head>
+<body>
+  <main class="cosmic-shell" aria-label="Cosmic Reactor Tetris">
+    <section class="hero-copy" aria-label="Game identity">
+      <p class="eyebrow">Cosmic Reactor</p>
+      <h1>Reactor Tetris</h1>
+      <p class="hero-lede">Charge the core with line clears, keep the combo chain alive, and detonate plasma bursts before the stack reaches orbit.</p>
+      <div class="hero-metrics" aria-label="Saved records">
+        <div>
+          <span>High Score</span>
+          <strong id="high-score">0</strong>
+        </div>
+        <div>
+          <span>Best Combo</span>
+          <strong id="best-combo">0</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="reactor-stage" aria-label="Playable reactor board">
+      <div id="pixi-stage" class="pixi-stage"></div>
+      <div id="overlay" class="overlay">
+        <p class="eyebrow" id="overlay-eyebrow">Ready</p>
+        <h2 id="overlay-title">Reactor Tetris</h2>
+        <p id="overlay-text">Press Enter or engage the reactor to start the cinematic launch.</p>
+        <button id="primary-action" class="primary-action" type="button">Engage Reactor</button>
+      </div>
+    </section>
+
+    <aside class="telemetry-panel" aria-label="Game telemetry">
+      <div class="brand-row">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <p class="eyebrow">Live Core</p>
+          <h2 id="state-label">Ready</h2>
+        </div>
+        <button id="mute-button" class="icon-button" type="button" aria-pressed="false">Sound On</button>
+      </div>
+
+      <div class="stats">
+        <div>
+          <span>Score</span>
+          <strong id="score">0</strong>
+        </div>
+        <div>
+          <span>Level</span>
+          <strong id="level">1</strong>
+        </div>
+        <div>
+          <span>Lines</span>
+          <strong id="lines">0</strong>
+        </div>
+      </div>
+
+      <div class="reactor-meter" aria-label="Reactor charge">
+        <div>
+          <span>Reactor Charge</span>
+          <strong id="reactor-value">0%</strong>
+        </div>
+        <div class="meter-track"><span id="reactor-fill"></span></div>
+      </div>
+
+      <div class="combo-strip" aria-label="Combo and back-to-back state">
+        <div>
+          <span>Combo</span>
+          <strong id="combo">0</strong>
+        </div>
+        <div>
+          <span>Back-to-back</span>
+          <strong id="back-to-back">0</strong>
+        </div>
+      </div>
+
+      <div class="preview-grid">
+        <section class="preview-card">
+          <h3>Next</h3>
+          <div id="next-preview" class="preview-board" aria-label="Next piece"></div>
+        </section>
+        <section class="preview-card">
+          <h3>Hold</h3>
+          <div id="hold-preview" class="preview-board" aria-label="Held piece"></div>
+        </section>
+      </div>
+
+      <section class="controls" aria-label="Controls">
+        <h3>Keys</h3>
+        <dl>
+          <div><dt>Left / Right</dt><dd>Move</dd></div>
+          <div><dt>Up</dt><dd>Rotate</dd></div>
+          <div><dt>Down</dt><dd>Soft drop</dd></div>
+          <div><dt>Space</dt><dd>Hard drop</dd></div>
+          <div><dt>C / Shift</dt><dd>Hold</dd></div>
+          <div><dt>P</dt><dd>Pause</dd></div>
+          <div><dt>Enter</dt><dd>Start / Restart</dd></div>
+        </dl>
+      </section>
+    </aside>
+
+    <nav class="touch-controls" aria-label="Touch controls">
+      <button type="button" data-action="move-left">Left</button>
+      <button type="button" data-action="move-right">Right</button>
+      <button type="button" data-action="rotate">Rotate</button>
+      <button type="button" data-action="soft-drop">Soft</button>
+      <button type="button" data-action="hard-drop">Drop</button>
+      <button type="button" data-action="hold">Hold</button>
+      <button type="button" data-action="pause">Pause</button>
+    </nav>
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
