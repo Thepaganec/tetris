@@ -8,6 +8,7 @@ export class GameHud {
 
   /** Обновляет все числовые показатели и preview-блоки. */
   update(snapshot, records, isMuted) {
+    document.body.dataset.gameState = snapshot.state;
     this.elements.score.textContent = formatNumber(snapshot.score);
     this.elements.level.textContent = String(snapshot.level);
     this.elements.lines.textContent = String(snapshot.lines);

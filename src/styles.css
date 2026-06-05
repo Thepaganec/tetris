@@ -49,6 +49,10 @@ button {
   align-items: center;
 }
 
+.cosmic-shell > * {
+  min-width: 0;
+}
+
 .hero-copy,
 .telemetry-panel,
 .reactor-stage {
@@ -405,7 +409,8 @@ button {
   }
 
   .cosmic-shell {
-    width: min(100vw - 20px, 520px);
+    width: calc(100% - 20px);
+    max-width: 460px;
     grid-template-columns: 1fr;
     padding: 10px 0 96px;
   }
@@ -418,13 +423,36 @@ button {
     font-size: 42px;
   }
 
+  .hero-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .reactor-stage {
     min-height: 560px;
     height: 66vh;
+    width: 100%;
   }
 
   .telemetry-panel {
     min-height: auto;
+  }
+
+  .overlay {
+    inset: 18px;
+    padding: 20px;
+  }
+
+  .overlay h2 {
+    font-size: 34px;
+  }
+
+  .overlay p {
+    justify-self: center;
+    max-width: 27ch;
+  }
+
+  .primary-action {
+    max-width: 100%;
   }
 
   .stats strong,
@@ -434,7 +462,8 @@ button {
     font-size: 21px;
   }
 
-  .touch-controls {
+  body[data-game-state="playing"] .touch-controls,
+  body[data-game-state="paused"] .touch-controls {
     position: fixed;
     z-index: 5;
     left: 10px;
@@ -459,9 +488,19 @@ button {
 }
 
 @media (max-width: 430px) {
+  .hero-metrics,
+  .combo-strip,
   .preview-grid,
   .stats {
     grid-template-columns: 1fr;
+  }
+
+  .hero-copy h1 {
+    font-size: 36px;
+  }
+
+  .hero-lede {
+    font-size: 15px;
   }
 
   .brand-row {
